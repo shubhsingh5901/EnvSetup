@@ -1,0 +1,130 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Clean, bracket-free layout matching the old oh-my-posh theme.json look:
+# path -> git -> kube context -> ghacct account -> cloud/IaC -> runtimes,
+# all on one line, prompt character on its own line below.
+format = """
+$directory\
+$git_branch$git_status\
+$kubernetes\
+${custom.ghacct}\
+$aws$terraform$pulumi\
+$nodejs$python$golang$rust$java\
+$cmd_duration\
+$line_break\
+$character"""
+
+add_newline = true
+command_timeout = 500
+scan_timeout = 30
+
+[character]
+success_symbol = '[❯](bold #98C379)'
+error_symbol = '[❯](bold #E06C75)'
+vimcmd_symbol = '[❮](bold yellow)'
+
+# ── path: "~/../personal/env_setup" style, matching agnoster_short ──────
+[directory]
+style = 'bold #61AFEF'
+format = '[$path]($style) '
+truncation_length = 2
+truncate_to_repo = false
+truncation_symbol = '~/../'
+home_symbol = '~'
+
+# ── git branch + status, no brackets, purple like before ────────────────
+[git_branch]
+symbol = ' '
+style = 'bold #C678DD'
+format = '[$symbol$branch]($style) '
+truncation_length = 24
+truncation_symbol = '…'
+
+[git_status]
+style = '#C678DD'
+format = '([$all_status$ahead_behind]($style)) '
+conflicted = '~${count} '
+stashed = '*${count} '
+deleted = '✘${count} '
+renamed = '»${count} '
+modified = '!${count} '
+staged = '+${count} '
+untracked = '?${count} '
+ahead = '⇡${count} '
+behind = '⇣${count} '
+diverged = '⇕⇡${ahead_count}⇣${behind_count} '
+
+# ── kubernetes: 󱃾 icon + context, cyan, matches oh-my-posh exactly ──────
+[kubernetes]
+disabled = false
+symbol = '󱃾 '
+style = 'bold #56B6C2'
+format = '[$symbol$context( \($namespace\))]($style) '
+
+[kubernetes.context_aliases]
+'arn:aws:eks:[^:]+:\d+:cluster/(?P<var_cluster>[\w-]+)' = '$var_cluster'
+
+# ── which ghacct GitHub account/workspace governs this directory ────────
+[custom.ghacct]
+description = 'Active ghacct GitHub account for this directory'
+command = 'ghacct-prompt'
+when = 'git rev-parse --is-inside-work-tree >/dev/null 2>&1'
+shell = ['bash', '--norc', '--noprofile']
+symbol = ' '
+format = '[$symbol$output]($style) '
+style = 'bold #C678DD'
+
+# ── cloud / IaC, colors matching the old theme ───────────────────────────
+[aws]
+symbol = '☁ '
+style = 'bold #E5C07B'
+format = '[$symbol$profile( \($region\))]($style) '
+
+[aws.region_aliases]
+ap-south-1 = 'mum'
+us-east-1 = 'va'
+eu-west-1 = 'ire'
+
+[terraform]
+symbol = '💠 '
+style = 'bold #BD93F9'
+format = '[$symbol$workspace]($style) '
+
+[pulumi]
+symbol = ' '
+style = 'bold #8BE9FD'
+format = '[$symbol$stack]($style) '
+search_upwards = true
+
+# ── runtimes, explicit format kills starship's default "via " prefix ────
+[nodejs]
+symbol = ' '
+style = 'bold #98C379'
+format = '[$symbol$version]($style) '
+detect_files = ['package.json', '.nvmrc']
+detect_folders = ['node_modules']
+
+[python]
+symbol = '🐍 '
+style = 'bold #FFD43B'
+format = '[$symbol$version(\($virtualenv\))]($style) '
+
+[golang]
+symbol = ' '
+style = 'bold #00ADD8'
+format = '[$symbol$version]($style) '
+
+[rust]
+symbol = '🦀 '
+style = 'bold #CE9178'
+format = '[$symbol$version]($style) '
+
+[java]
+symbol = '☕ '
+style = 'bold #E06C75'
+format = '[$symbol$version]($style) '
+
+[cmd_duration]
+min_time = 500
+style = 'bold #7F848E'
+format = '[⏱ $duration]($style) '
